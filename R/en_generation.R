@@ -92,7 +92,7 @@ en_gen_inst_agg_gen_cap_api_req_helper <- function(psr_type, eic, period_start, 
 #'
 #' fr_2020 <- en_generation_agg_gen_per_type(eic = "10YFR-RTE------C", period_start = lubridate::ymd("2020-02-01", tz = "CET"), period_end = lubridate::ymd("2020-03-01", tz = "CET"))
 #'
-en_generation_agg_gen_per_type <- function(eic, period_start, period_end, security_token = NULL){
+en_generation_agg_gen_per_type <- function(eic, period_start, period_end, gen_type = c("B01", "B02", "B03", "B04", "B05", "B06", "B08", "B09", "B10", "B11", "B12", "B13", "B14", "B15", "B16", "B17", "B18", "B19", "B20"), security_token = NULL){
 
   period_start <- url_posixct_format(period_start)
   period_end <- url_posixct_format(period_end)
@@ -105,16 +105,14 @@ en_generation_agg_gen_per_type <- function(eic, period_start, period_end, securi
     stop("This wrapper only supports one EIC per request.")
   }
 
-  gen_type <- as.character(c(NA))
-
   url_list <- lapply(gen_type, en_gen_agg_gen_pertype_api_req_helper, eic = eic, period_start = period_start, period_end = period_end, security_token = security_token)
 
   api_req_safe <- purrr::safely(api_req)
 
   en_cont <- purrr::map(url_list, api_req_safe)
   en_cont <- purrr::map(en_cont, "result")
-  #en_cont <- purrr::map(en_cont, "GL_MarketDocument")
-  en_cont[sapply(en_cont, is.null)] <- NULL
+  en_cont <- purrr::map(en_cont, "GL_MarketDocument")
+  #en_cont[sapply(en_cont, is.null)] <- NULL
 
   en_cont <- purrr::map(en_cont, xml2::as_list)
   en_cont <- en_cont[[1]]$GL_MarketDocument
@@ -133,7 +131,7 @@ en_gen_agg_gen_pertype_api_req_helper <- function(psr_type, eic, period_start, p
     "https://transparency.entsoe.eu/api",
     "?documentType=A75",
     "&processType=A16",
-    #"&psrType=", psr_type,
+    "&psrType=", psr_type,
     "&in_Domain=", eic,
     "&periodStart=",period_start,
     "&periodEnd=", period_end,
