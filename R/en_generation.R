@@ -111,7 +111,7 @@ en_generation_agg_gen_per_type <- function(eic, period_start, period_end, gen_ty
 
   en_cont <- purrr::map(url_list, api_req_safe)
   en_cont <- purrr::map(en_cont, "result")
-  en_cont <- purrr::map(en_cont, "GL_MarketDocument")
+  #en_cont <- purrr::map(en_cont, "GL_MarketDocument")
   en_cont[sapply(en_cont, is.null)] <- NULL
 
   en_cont <- purrr::map(en_cont, xml2::as_list)
